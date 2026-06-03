@@ -124,110 +124,6 @@ const SIGNATURE_MOVE_TEMPLATE = {
   }
 };
 
-/*
-==============================
-SIGNATURE MOVE EDITING GUIDE
-==============================
-
-This section is the ONLY place you should edit Signature Moves.
-
-📍 LOCATION RULE (IMPORTANT)
-- All Signature Move edits belong HERE, in the APP STATE section.
-- Do NOT edit moves.json.
-- Do NOT edit showMove().
-- Do NOT edit resolver logic.
-- You ONLY edit data inside signatureMoveBySlot.
-
---------------------------------
-HOW THIS IS STRUCTURED
---------------------------------
-
-Each Pokémon slot (1–4) has its OWN signature move object:
-
-signatureMoveBySlot[1] → Pokémon 1
-signatureMoveBySlot[2] → Pokémon 2
-signatureMoveBySlot[3] → Pokémon 3
-signatureMoveBySlot[4] → Pokémon 4
-
-These are fully independent.
-Editing one will NEVER affect another.
-
---------------------------------
-HOW TO EDIT A SIGNATURE MOVE
---------------------------------
-
-You ALWAYS follow this pattern:
-
-1️⃣ Choose the Pokémon slot (1–4)
-2️⃣ Set baseMoveId (required)
-3️⃣ Edit ONLY the overrides you want to change
-
-Example: Pokémon 1
---------------------------------
-signatureMoveBySlot[1].baseMoveId = "ember";
-
-signatureMoveBySlot[1].overrides.element = "water";
-signatureMoveBySlot[1].overrides.baseDice = 3;
-signatureMoveBySlot[1].overrides.descriptionPrefix =
-  "Bond Technique: ";
-
---------------------------------
-Example: Pokémon 2
---------------------------------
-signatureMoveBySlot[2].baseMoveId = "fake_out";
-
-signatureMoveBySlot[2].overrides.category = "special";
-signatureMoveBySlot[2].overrides.descriptionSuffix =
-  " This move does not cause flinch.";
-
---------------------------------
-FIELDS YOU ARE ALLOWED TO EDIT
---------------------------------
-
-Inside .overrides you may set:
-
-- name                (string)
-- element             (string)
-- category            (string)
-- baseDice            (number)
-
-- descriptionPrefix   (string)
-- descriptionSuffix   (string)
-
-- range               (string)
-- target              (string)
-- economy             (string)
-
-- tags                (array of strings)
-
-If a value is NULL or empty, the base move’s value is used.
-
---------------------------------
-IMPORTANT RULES (DO NOT BREAK)
---------------------------------
-
-❌ Do NOT overwrite the entire overrides object
-❌ Do NOT mutate MOVES_DB
-❌ Do NOT edit showMove()
-❌ Do NOT duplicate full descriptions unless intentional
-
-All logic merges happen automatically during preview.
-
---------------------------------
-MENTAL MODEL
---------------------------------
-
-Base Move (moves.json)
-   ↓
-Signature Overrides (THIS SECTION)
-   ↓
-Resolved Preview (read-only)
-   ↓
-Rendered by showMove()
-
-If something looks wrong, check overrides FIRST.
-*/
-
 
 let signatureMoveBySlot = {
   1: structuredClone(SIGNATURE_MOVE_TEMPLATE),
@@ -1188,6 +1084,24 @@ function statToMod(statValue) {
   if (n <= 129) return "+4";
   if (n >= 160) return "+6";
   return "+5"; // 130–159
+}
+
+// MAN uses its own scale because it is based on manipulation options,
+// not standard Pokemon base stat values.
+function manToMod(manValue) {
+  const n = Number(manValue);
+
+  if (!Number.isFinite(n)) return "";
+
+  if (n <= 4) return -2;
+  if (n <= 9) return -1;
+  if (n <= 14) return 0;
+  if (n <= 19) return "+1";
+  if (n <= 24) return "+2";
+  if (n <= 29) return "+3";
+  if (n <= 34) return "+4";
+  if (n <= 39) return "+5";
+  return "+6";
 }
 
 function movementFromSpdMod(spdMod) {
@@ -2424,7 +2338,7 @@ function fillSlotModsFromStats(slotNumber) {
   document.getElementById(`p${slotNumber}-def-mod`).value = statToMod(document.getElementById(`p${slotNumber}-def`).value);
   document.getElementById(`p${slotNumber}-sp-atk-mod`).value = statToMod(document.getElementById(`p${slotNumber}-sp-atk`).value);
   document.getElementById(`p${slotNumber}-sp-def-mod`).value = statToMod(document.getElementById(`p${slotNumber}-sp-def`).value);
-  document.getElementById(`p${slotNumber}-man-mod`).value = statToMod(document.getElementById(`p${slotNumber}-man`).value);
+  document.getElementById(`p${slotNumber}-man-mod`).value = manToMod(document.getElementById(`p${slotNumber}-man`).value);
   document.getElementById(`p${slotNumber}-spd-mod`).value = statToMod(document.getElementById(`p${slotNumber}-spd`).value);
 }
 
