@@ -243,12 +243,13 @@
 
   "reactor": {
     "name": "Reactor",
-    "levels": {
     "dice": {
         "physical": "d6",
         "special": "d6",
         "healing": "d4"
     },
+    "levels": {
+    
       "1": {
         "type": "great_move",
         "grants": {
